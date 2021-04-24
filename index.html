@@ -31,6 +31,18 @@
     <script>
       let socket = io();
 
+      socket.on('connect', () => {
+        console.log("id socket cok: ", socket.id);
+        // masukin username saat step ini, should use modal or stuff
+        // set timeout to change username first;
+        setTimeout(() => {
+          socket.emit('register online user', {
+            id: socket.id,
+            username: username.innerHTML,
+          });
+        }, 5000);
+      })
+
       let messages = document.getElementById('messages');
       let form = document.getElementById('form-message');
       let input = document.getElementById('input-message');

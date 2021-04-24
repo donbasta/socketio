@@ -5,6 +5,8 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
+const onlineUsers = [];
+
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
@@ -17,14 +19,22 @@ io.on('connection', (socket) => {
         io.emit('chat message', msg);
     });
     socket.on('disconnect', () => {
-        console.log('user disconnected');
-        io.emit('leave chat', 'someone has left the chat');
+        console.log(`user with id ${socket.id} disconnected`);
+        const disconnectedUsername = onlineUsers[socket.id];
+        console.log("sebelum dihapus: ", onlineUsers);
+        delete onlineUsers[socket.id];
+        console.log("sisa: ", onlineUsers);
+        io.emit('leave chat', `${disconnectedUsername} has left the chat`);
     });
     socket.on('user typing', (who) => {
         io.emit('user typing', who);
     });
     socket.on('stop typing', () => {
         io.emit('stop typing');
+    });
+    socket.on('register online user', (user) => {
+        onlineUsers[user.id] = user.username;
+        console.log("current users now: ", onlineUsers);
     })
 });
 
