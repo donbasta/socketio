@@ -5,40 +5,66 @@
     <style>
       body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
 
-      #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
-      #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
-      #input:focus { outline: none; }
-      #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+      .form-message { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
+      .input-message { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
+      .input-message:focus { outline: none; }
+      .form-message > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
 
       #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages > li { padding: 0.5rem 1rem; }
+      #messages > li { padding: 5px 10px; }
       #messages > li:nth-child(odd) { background: #efefef; }
     </style>
   </head>
   <body>
+    <div>
+      Username:
+      <p id="username"></p>
+      Change username:
+      <input id="input-username" autocomplete="off" /><button onclick="changeUsername()">change</button>
+    </div>
     <ul id="messages"></ul>
-    <form id="form" action="">
-      <input id="input" autocomplete="off" /><button>Send</button>
+    <form id="form-message" class="form-message" action="">
+      <input id="input-message" class="input-message" autocomplete="off" /><button>Send</button>
     </form>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       let socket = io();
 
       let messages = document.getElementById('messages');
-      let form = document.getElementById('form');
-      let input = document.getElementById('input');
+      let form = document.getElementById('form-message');
+      let input = document.getElementById('input-message');
+      let username = document.getElementById('username');
+      let inputUsername = document.getElementById('input-username');
+
+      const changeUsername = () => {
+        username.innerHTML = inputUsername.value;
+        inputUsername.value = "";
+        console.log(username, username.innerHTML);
+      }
 
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         if (input.value) {
-          socket.emit('chat message', input.value);
+          let item = document.createElement('li');
+          item.textContent = `From ME: ${input.value}`;
+          messages.appendChild(item);
+          window.scrollTo(0, document.body.scrollHeight);
+
+          console.log('teehee', username.innerHTML);
+          socket.emit('chat message', {
+            content: input.value,
+            sender: username.innerHTML,
+          })
           input.value = '';
         }
       });
 
       socket.on('chat message', (msg) => {
+        if (msg.sender === username.innerHTML) {
+          return;
+        }
         let item = document.createElement('li');
-        item.textContent = msg;
+        item.textContent = `From ${msg.sender}: ${msg.content}`;
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
       });
