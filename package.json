@@ -2,5 +2,7 @@
     "name": "socket-chat",
     "version": "0.0.1",
     "description": "playground socket.io",
-    "dependencies": {}
+    "dependencies": {
+        "express": "^4.17.1"
+    }
 }
