@@ -20,6 +20,12 @@ io.on('connection', (socket) => {
         console.log('user disconnected');
         io.emit('leave chat', 'someone has left the chat');
     });
+    socket.on('user typing', (who) => {
+        io.emit('user typing', who);
+    });
+    socket.on('stop typing', () => {
+        io.emit('stop typing');
+    })
 });
 
 server.listen(3000, () => {

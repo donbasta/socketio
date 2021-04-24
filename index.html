@@ -23,6 +23,7 @@
       <input id="input-username" autocomplete="off" /><button onclick="changeUsername()">change</button>
     </div>
     <ul id="messages"></ul>
+    <p id="info-typing"></p>
     <form id="form-message" class="form-message" action="">
       <input id="input-message" class="input-message" autocomplete="off" /><button>Send</button>
     </form>
@@ -35,6 +36,7 @@
       let input = document.getElementById('input-message');
       let username = document.getElementById('username');
       let inputUsername = document.getElementById('input-username');
+      let infoTyping = document.getElementById('info-typing');
 
       const changeUsername = () => {
         username.innerHTML = inputUsername.value;
@@ -54,9 +56,27 @@
           socket.emit('chat message', {
             content: input.value,
             sender: username.innerHTML,
-          })
+          });
+          socket.emit('stop typing');
           input.value = '';
         }
+      });
+
+      form.addEventListener('input', () => {
+        socket.emit('user typing', {
+          sender: username.innerHTML
+        });
+      });
+
+      socket.on('user typing', (who) => {
+        if (who.sender !== username.innerHTML) {
+          console.log(`${who.sender} is typing ...`);
+          infoTyping.innerHTML = `${who.sender} is typing ...`;
+        }
+      });
+
+      socket.on('stop typing', () => {
+        infoTyping.innerHTML = "";
       });
 
       socket.on('chat message', (msg) => {
